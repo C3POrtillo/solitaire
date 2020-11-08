@@ -6,14 +6,18 @@ class Card:
   icons = ["♣", "♥", "♠", "♦"]
   ranks = [" A", " 2", " 3", " 4", " 5", " 6", " 7", " 8", " 9", "10", " J", " Q", " K"]
 
-  def __init__(self, suit=0, rank=3):
+  def __init__(self, suit=0, rank=3, visible=False):
     self.suit = suit
     self.rank = rank
+    self.visible = visible
 
   def __str__(self):
     rank = Card.ranks[self.rank]
     icon = Card.icons[self.suit]
-    return f"[{rank} {icon}]"
+    if self.visible:
+      return f"[{rank} {icon}]"
+    else:
+      return "[    ]"
 
 class Deck:
   def __init__(self, cards=None):
@@ -29,7 +33,10 @@ class Deck:
     return len(self.cards)
 
   def __getitem__(self, index):
-    return self.cards[index]
+    try:
+      return self.cards[index]
+    except:
+      pass
 
   def append(self, card):
     self.cards.append(card)
@@ -40,14 +47,17 @@ class Deck:
   def pop(self, i=-1):
     return self.cards.pop(i)
 
+  def insert(self, i, card):
+    self.cards.insert(i, card)
+
   def shuffle(self):
     random.shuffle(self.cards)
 
-  def display_top(self, count=1):
-    if len(self) != 0:
-      return str(self[-count])
-    else:
-      return ""
+  def get_top_cards(self, count=1):
+    return self[-count:]
+
+  def is_empty(self):
+    return len(self.cards) == 0
 
 if __name__ == '__main__':
   deck = Deck()
