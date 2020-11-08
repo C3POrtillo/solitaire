@@ -61,13 +61,13 @@ class Solitaire:
   def display_game(self):
     # 8 columns for cards
     r1 = [""] * 8
-    r1[0] = "[DECK]" if len(s.stock) > 0 else ""
+    r1[0] = "[DECK]" if len(self.stock) > 0 else ""
     for i in range(4):
       r1[4+i] = self.foundation[i].get_top_cards()[0]
 
     r1 = "\t".join(str(_) for _ in r1)
     r2 = "\t".join(str(_) for _ in self.reserve.get_top_cards())
-    return "\n\n".join([Solitaire.pad, r1, r2, self.display_columns(),Solitaire.pad])
+    return "\n\n".join([Solitaire.pad, r1, r2, self.display_columns(), Solitaire.pad])
 
   def draw_card(self, count=None):
     if count == None:
@@ -140,7 +140,7 @@ def is_valid_move(card_1: deck.Card, card_2: deck.Card, foundation=False):
   pattern = foundation
   if card_1 is None:
     return False
-    
+
   if foundation:
     if card_2 is not None:
       ordinance = card_1.rank == (card_2.rank + 1)
@@ -164,7 +164,7 @@ def is_valid_move(card_1: deck.Card, card_2: deck.Card, foundation=False):
     return True
 
 if __name__ == '__main__':
-  s = Solitaire(1)
+  s = Solitaire()
   s.draw_card()
   print(s.display_game())
   card = s.reserve.pop()

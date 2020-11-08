@@ -18,6 +18,9 @@ class Card:
       return f"[{rank} {icon}]"
     else:
       return "[    ]"
+  
+  def __repr__(self):
+    return self.__str__()
 
 class Deck:
   def __init__(self, cards=None):
