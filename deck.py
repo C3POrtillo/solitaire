@@ -22,6 +22,24 @@ class Card:
   def __repr__(self):
     return self.__str__()
 
+  def __lt__(self, other):
+    return self.rank < other.rank
+
+  def __gt__(self, other):
+    return self.rank > other.rank
+  
+  def __le__(self, other):
+    return self.rank <= other.rank
+
+  def __ge__(self, other):
+    return self.rank >= other.rank
+
+  def __eq__(self, other):
+    return self.rank == other.rank
+
+  def __ne__(self, other):
+    return self.rank != other.rank
+
 class Deck:
   def __init__(self, cards=None):
     if cards == None:
@@ -29,8 +47,17 @@ class Deck:
     else:
       self.cards = cards
 
+  def __iter__(self):
+    return iter(self.cards)
+
+  def __next__(self):
+    return next(self.cards)
+
   def __str__(self):
     return '\t'.join(str(card) for card in self.cards)
+
+  def __repr__(self):
+    return self.__str__()
 
   def __len__(self):
     return len(self.cards)
@@ -39,7 +66,7 @@ class Deck:
     try:
       return self.cards[index]
     except:
-      pass
+      return None
 
   def append(self, card):
     self.cards.append(card)
