@@ -10,11 +10,15 @@ import solitaire as s
 
 class Player:
   def __init__(self, game=None):
-    self.game = s.Solitaire() if game is None else game
-    self.moves = 0
+    self.start_game(game)
     self.visible_cards_count = [1] * s.Solitaire.col_len
-    self.visited = [] 
+    self.visited = []
+    self.wins = 0
+    self.losses = 0
     
+  def start_game(self, game):
+    self.moves = 0
+    self.game = s.Solitaire() if game is None else game
     
   def generate_valid_moves(self):
     # -2 = card to foundation
@@ -25,7 +29,7 @@ class Player:
     valid_moves.update(self.generate_c2c_moves())
     valid_moves.update(self.generate_c2f_moves())
 
-
+    print(valid_moves)
     return valid_moves
 
   def generate_h2c_moves(self):
@@ -49,7 +53,7 @@ class Player:
    
     for src in range(s.Solitaire.col_len):
       card = s.get_first_visible_card(self.game.columns[src])[0]
-      if card is None or (len(self.game.columns[src]) == 1 and card.rank == 12):
+      if card is None or (card.rank == 12 and card is self.game.columns[src][0]):
         continue
       for dst in range(s.Solitaire.col_len):
         if src == dst:  
@@ -87,62 +91,77 @@ class Player:
     
 
   def best_move(self):
-    if self.game.won():
-      return self.moves
+    if self.game.end():
+      return True
+
     valid_moves = self.generate_valid_moves()
     m_count = len(valid_moves)
+    move = None
+
 
     # No valid moves
     if m_count == 0:
-      self.game.draw_card()
-    # hand is the only valid move
+      move = self.game.draw_card()
+    # hand to columns
     elif m_count == 1 and -1 in valid_moves:
-      self.move_h2c(valid_moves[-1])
-    # a card can be put on its respective foundation pile
-    elif -2 in valid_moves:
-      self.move_c2f(valid_moves[-2])
-    # a valid move exists somewhere
+      move = self.move_h2c(valid_moves[-1])
+    # card to foundation
+    elif m_count == 1 and -2 in valid_moves:
+      move = self.move_c2f(valid_moves[-2])
+    # if 2 moves exist (hand or foundation), move card to foundation
+    elif m_count == 2 and -1 in valid_moves and -2 in valid_moves:
+      move = self.move_c2f(valid_moves[-2])
+    # there is at least 1 column to column move
     else: 
-      self.move_c2c(valid_moves)
+      move = self.move_c2c(valid_moves)
 
-    self.moves += 1
-
+    if move:
+      self.moves += 1
+    return valid_moves
 
   def move_h2c(self, moves):
     card = self.game.reserve.pop() 
     dst = self.get_longest_visible_column(moves)
       
-    self.game.card_to_column(card, dst)
-    self.visible_cards_count[dst] += 1
+    ret = self.game.card_to_column(card, dst)
+    self.visible_cards_count[dst] = count_visible(self.game.columns[dst])
+    return ret
 
   def move_c2c(self, moves):
     max_card = deck.Card(suit=-1, rank=-1) # filler card
     max_src = -1
 
     for src in moves:
-      if src == -1:
+      # ignore hand or foundation moves
+      if src == -1 or src == -2:
         continue
+      # move the largest card first
       curr = s.get_first_visible_card(self.game.columns[src])[0]
       if curr > max_card:
         max_card = curr
         max_src = src
-
+    # move the largest card to the longest pile
     dst = self.get_longest_visible_column(moves[max_src])
-    self.game.column_to_column(max_src, dst)
+    ret = self.game.column_to_column(max_src, dst)
     self.visible_cards_count[dst] = count_visible(self.game.columns[dst])
+    return ret
 
   def move_c2f(self, moves):
     card = None
     for src in moves:
+      # skip hand
       if src == -1:
-        card = self.game.reserve.pop()
-        break
+        continue
+      # move card from column t o foundation
       else:
         card = self.game.columns[src].pop()
         if not self.game.columns[src].is_empty():
           self.game.columns[src][-1].visible = True
         break
-    self.game.card_to_foundation(card)
+    # move from hand if no other move is possible
+    if card is None and -1 in moves:
+      card = self.game.reserve.pop()
+    return self.game.card_to_foundation(card)
   
   def get_longest_visible_column(self, moves):
     dst = None
@@ -164,9 +183,10 @@ def count_visible(src: deck.Deck):
 
 
 if __name__ == '__main__':
-  p = Player()
+  p = Player(s.Solitaire(shuffle=False))
   print(p.game.display_game())
-  while(p.best_move() == None):
-    p.best_move()
+  go = None
+  while(go != True):
+    go = p.best_move()
     print(p.game.display_game())
     print(p.moves)

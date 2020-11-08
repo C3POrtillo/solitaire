@@ -16,10 +16,11 @@ class Solitaire:
   pad = "=" * 54
   valid_patterns = [[1,3], [0,2]] # C/S = 0, H/D = 1
   
-  def __init__(self, n=1):
+  def __init__(self, n=1, shuffle=True):
     self.draw = n
     self.stock = deck.Deck()
-    # self.stock.shuffle()
+    if shuffle:
+      self.stock.shuffle()
     self.reserve = deck.Deck([])
 
     self.columns = []
@@ -72,6 +73,9 @@ class Solitaire:
     return "\n\n".join([Solitaire.pad, r1, r2, self.display_columns(), Solitaire.pad])
 
   def draw_card(self, count=None):
+    if self.stock.is_empty() and self.reserve.is_empty():
+      return False
+
     if count == None:
       count = self.draw
 
@@ -83,6 +87,8 @@ class Solitaire:
       drawn_card = self.stock.pop()
       drawn_card.visible = True
       self.reserve.append(drawn_card)
+
+    return True
 
   def reset_deck(self):
     while not self.reserve.is_empty():
@@ -122,7 +128,7 @@ class Solitaire:
 
     return valid
 
-  def won(self):  
+  def end(self):
     for f in self.foundations:
       if len(f) != 13:
         return False
