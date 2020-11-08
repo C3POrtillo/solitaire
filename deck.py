@@ -38,7 +38,10 @@ class Card:
     return self.rank == other.rank
 
   def __ne__(self, other):
-    return self.rank != other.rank
+    return not(self == other)
+
+  def __hash__(self):
+    return hash(self.rank, self.suit)
 
 class Deck:
   def __init__(self, cards=None):
@@ -57,7 +60,10 @@ class Deck:
     return '\t'.join(str(card) for card in self.cards)
 
   def __repr__(self):
-    return self.__str__()
+    return self.__str__() 
+
+  def __hash__(self):
+    return super().__hash__()
 
   def __len__(self):
     return len(self.cards)

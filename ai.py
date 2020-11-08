@@ -13,20 +13,18 @@ class Player:
     self.game = s.Solitaire() if game is None else game
     self.moves = 0
     self.visible_cards_count = [1] * s.Solitaire.col_len
-    self.visited = []
+    self.visited = [] 
     
     
   def generate_valid_moves(self):
     # -2 = card to foundation
     # -1 = hand to columns
     # 0-7 = columns to columns
-    # value is false if move is invalid
-    # values is a list of valid columns if there exists a valid move
 
     valid_moves = self.generate_h2c_moves()
     valid_moves.update(self.generate_c2c_moves())
     valid_moves.update(self.generate_c2f_moves())
-    print(valid_moves)
+
 
     return valid_moves
 
@@ -51,7 +49,7 @@ class Player:
    
     for src in range(s.Solitaire.col_len):
       card = s.get_first_visible_card(self.game.columns[src])[0]
-      if card is None:
+      if card is None or (len(self.game.columns[src]) == 1 and card.rank == 12):
         continue
       for dst in range(s.Solitaire.col_len):
         if src == dst:  
@@ -89,6 +87,8 @@ class Player:
     
 
   def best_move(self):
+    if self.game.won():
+      return self.moves
     valid_moves = self.generate_valid_moves()
     m_count = len(valid_moves)
 
@@ -166,8 +166,7 @@ def count_visible(src: deck.Deck):
 if __name__ == '__main__':
   p = Player()
   print(p.game.display_game())
-  for i in range(101):
+  while(p.best_move() == None):
     p.best_move()
     print(p.game.display_game())
     print(p.moves)
-  print("\t".join(str(len(_)) for _ in p.game.foundations))

@@ -122,6 +122,12 @@ class Solitaire:
 
     return valid
 
+  def won(self):  
+    for f in self.foundations:
+      if len(f) != 13:
+        return False
+    return True
+
 def get_first_visible_card(src: deck.Deck):
   card = None
   i = 0
@@ -155,12 +161,7 @@ def is_valid_move(card_1: deck.Card, card_2: deck.Card, foundation=False):
   return ordinance and pattern
 
   
-  def game_over(self):  
-    for f in self.foundations:
-      if len(f) != 13:
-        return False
 
-    return True
 
 if __name__ == '__main__':
   s = Solitaire()
